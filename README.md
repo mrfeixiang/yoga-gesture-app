@@ -37,7 +37,7 @@
 ## 🚀 快速开始
 
 ### 在线体验
-直接访问 GitHub Pages：[点击这里体验](https://你的用户名.github.io/yoga-gesture-app/)
+直接访问 GitHub Pages：[点击这里体验](https://mrfeixiang.github.io/yoga-gesture-app/)
 
 ### 本地运行
 
@@ -170,7 +170,7 @@ for (let i = 0; i < currentFrame.data.length; i += 4) {
 ## 👨‍💻 作者
 
 **Dr. Pei**
-- GitHub: [@你的用户名](https://github.com/你的用户名)
+- GitHub: [@mrfeixiang](https://github.com/mrfeixiang)
 
 ## 🙏 致谢
 
@@ -181,7 +181,7 @@ for (let i = 0; i < currentFrame.data.length; i += 4) {
 ## 📞 联系方式
 
 如有问题或建议，欢迎：
-- 提交 [Issue](https://github.com/你的用户名/yoga-gesture-app/issues)
+- 提交 [Issue](https://github.com/mrfeixiang/yoga-gesture-app/issues)
 - 发送邮件至：your.email@example.com
 
 ---
