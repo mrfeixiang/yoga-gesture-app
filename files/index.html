@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手势控制瑜伽生成器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #4a148c 0%, #1a237e 50%, #311b92 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .sparkle {
+            color: #fbbf24;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #93c5fd;
+            font-size: 1.2rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .video-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        #video {
+            width: 100%;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 240px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .motion-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+            display: none;
+        }
+
+        .motion-badge.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 倒计时样式 */
+        .countdown-container {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .countdown-label {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .countdown-display {
+            color: white;
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .countdown-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .countdown-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-start {
+            background: #10b981;
+        }
+
+        .btn-start:hover {
+            background: #059669;
+        }
+
+        .btn-pause {
+            background: #f59e0b;
+        }
+
+        .btn-pause:hover {
+            background: #d97706;
+        }
+
+        .btn-reset {
+            background: #6366f1;
+        }
+
+        .btn-reset:hover {
+            background: #4f46e5;
+        }
+
+        .time-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .time-option {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .time-option:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .time-option.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: white;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-green {
+            background: #10b981;
+        }
+
+        .btn-green:hover {
+            background: #059669;
+        }
+
+        .btn-red {
+            background: #ef4444;
+        }
+
+        .btn-red:hover {
+            background: #dc2626;
+        }
+
+        .btn-blue {
+            background: #3b82f6;
+        }
+
+        .btn-blue:hover {
+            background: #2563eb;
+        }
+
+        .pose-display {
+            min-height: 500px;
+        }
+
+        .pose-content {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 瑜伽姿势图示 */
+        .pose-illustration {
+            background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 16px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pose-icon {
+            font-size: 6rem;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+
+        .pose-name {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .pose-section {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .pose-section h4 {
+            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pose-section p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .description-text {
+            color: #bfdbfe;
+        }
+
+        .benefits-text {
+            color: #bbf7d0;
+        }
+
+        .tip-box {
+            background: rgba(59, 130, 246, 0.3);
+            border: 2px solid #60a5fa;
+            border-radius: 12px;
+            padding: 16px;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .placeholder-content {
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .instructions h3 {
+            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .instructions ul {
+            list-style: none;
+            color: #93c5fd;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .breathing-guide {
+            background: rgba(139, 92, 246, 0.3);
+            border: 2px solid #a78bfa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            color: white;
+            text-align: center;
+        }
+
+        .breathing-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 标题 -->
+        <div class="header">
+            <h1>
+                <span class="sparkle">✨</span>
+                手势控制瑜伽生成器
+                <span class="sparkle">✨</span>
+            </h1>
+            <p class="subtitle">挥动手势，随机获取适合初学者的瑜伽姿势</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- 左侧：摄像头和倒计时 -->
+            <div class="card">
+                <h2 class="card-title">
+                    <span>📷</span>
+                    手势控制区
+                </h2>
+                
+                <!-- 摄像头显示 -->
+                <div class="video-container">
+                    <video id="video" autoplay playsinline muted style="display: none;"></video>
+                    <div id="placeholder" class="placeholder">摄像头未启动</div>
+                    <canvas id="canvas"></canvas>
+                    <div id="motionBadge" class="motion-badge">检测到手势！</div>
+                </div>
+
+                <!-- 倒计时器 -->
+                <div class="countdown-container">
+                    <div class="countdown-label">保持姿势倒计时</div>
+                    <div class="countdown-display" id="countdownDisplay">00:30</div>
+                    
+                    <div class="time-selector">
+                        <button class="time-option" data-time="15">15秒</button>
+                        <button class="time-option active" data-time="30">30秒</button>
+                        <button class="time-option" data-time="60">60秒</button>
+                        <button class="time-option" data-time="90">90秒</button>
+                    </div>
+
+                    <div class="countdown-controls">
+                        <button id="startBtn" class="countdown-btn btn-start">开始</button>
+                        <button id="pauseBtn" class="countdown-btn btn-pause">暂停</button>
+                        <button id="resetBtn" class="countdown-btn btn-reset">重置</button>
+                    </div>
+
+                    <div class="breathing-guide" id="breathingGuide" style="display: none;">
+                        <div>🫁 呼吸引导</div>
+                        <div class="breathing-text" id="breathingText">吸气...</div>
+                    </div>
+                </div>
+
+                <!-- 控制按钮 -->
+                <div class="button-group">
+                    <button id="cameraBtn" class="btn btn-green">启动摄像头</button>
+                    <button id="generateBtn" class="btn btn-blue">
+                        <span>🔄</span>
+                        手动生成
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧：瑜伽姿势显示 -->
+            <div class="card pose-display">
+                <h2 class="card-title">当前瑜伽姿势</h2>
+                
+                <div id="poseContent">
+                    <div class="placeholder-content">
+                        <div class="placeholder-icon">🧘</div>
+                        <p style="font-size: 1.25rem;">启动摄像头并挥动手势</p>
+                        <p style="font-size: 0.875rem; margin-top: 8px;">或点击"手动生成"按钮</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>🎥 <strong>步骤1：</strong> 点击"启动摄像头"按钮允许访问摄像头</li>
+                <li>👋 <strong>步骤2：</strong> 在摄像头前挥动手或移动身体</li>
+                <li>✨ <strong>步骤3：</strong> 系统检测到动作后会自动生成随机瑜伽姿势</li>
+                <li>⏱️ <strong>步骤4：</strong> 选择保持时间，点击"开始"使用倒计时功能</li>
+                <li>🔄 <strong>提示：</strong> 也可以直接点击"手动生成"按钮获取新姿势</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 初学者瑜伽姿势列表（带图标）
+        const beginnerYogaPoses = [
+            { 
+                name: '山式 (Tadasana)', 
+                icon: '🧍',
+                description: '双脚并拢站立，身体挺直，双臂自然垂放，感受身体重心均匀分布', 
+                difficulty: '简单', 
+                benefits: '改善姿势，增强平衡，培养身体觉知',
+                breathing: '自然呼吸，感受身体的稳定'
+            },
+            { 
+                name: '树式 (Vrksasana)', 
+                icon: '🌳',
+                description: '单脚站立，另一只脚放在大腿内侧，双手合十于胸前或举过头顶', 
+                difficulty: '简单', 
+                benefits: '提高平衡感，增强腿部力量，提升专注力',
+                breathing: '深呼吸，保持平衡和专注'
+            },
+            { 
+                name: '猫牛式 (Cat-Cow)', 
+                icon: '🐱',
+                description: '四肢着地，交替拱背和塌腰，配合呼吸节奏进行', 
+                difficulty: '非常简单', 
+                benefits: '放松脊柱，缓解背部紧张，改善脊柱灵活性',
+                breathing: '吸气时塌腰，呼气时拱背'
+            },
+            { 
+                name: '下犬式 (Downward Dog)', 
+                icon: '🐕',
+                description: '双手双脚着地，臀部抬高形成倒V形，脚跟尽量贴地', 
+                difficulty: '中等', 
+                benefits: '拉伸全身，增强手臂力量，缓解疲劳',
+                breathing: '深长呼吸，放松肩颈'
+            },
+            { 
+                name: '婴儿式 (Child\'s Pose)', 
+                icon: '👶',
+                description: '跪坐，额头贴地，双臂前伸或放在身体两侧', 
+                difficulty: '非常简单', 
+                benefits: '放松身心，缓解压力，舒缓背部',
+                breathing: '深呼吸，完全放松'
+            },
+            { 
+                name: '战士一式 (Warrior I)', 
+                icon: '⚔️',
+                description: '弓步站立，前腿弯曲90度，双臂向上伸展，后腿伸直', 
+                difficulty: '中等', 
+                benefits: '增强腿部力量，打开胸腔，提升能量',
+                breathing: '深呼吸，感受力量'
+            },
+            { 
+                name: '桥式 (Bridge Pose)', 
+                icon: '🌉',
+                description: '仰卧，双脚踩地，抬起臀部和背部，双手可在下方交握', 
+                difficulty: '简单', 
+                benefits: '强化核心，拉伸胸部，改善血液循环',
+                breathing: '吸气抬起，呼气保持'
+            },
+            { 
+                name: '坐姿前屈 (Seated Forward Bend)', 
+                icon: '🪑',
+                description: '坐姿双腿伸直，身体前倾，双手尽量触碰脚趾', 
+                difficulty: '简单', 
+                benefits: '拉伸腿部后侧，放松背部，平静心神',
+                breathing: '呼气时前屈，吸气时延展'
+            }
+        ];
+
+        // 状态变量
+        let cameraActive = false;
+        let currentPose = null;
+        let previousFrame = null;
+        let stream = null;
+        
+        // 倒计时变量
+        let countdownTime = 30;
+        let remainingTime = 30;
+        let countdownInterval = null;
+        let isCountdownRunning = false;
+        let breathingInterval = null;
+
+        // DOM元素
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const placeholder = document.getElementById('placeholder');
+        const motionBadge = document.getElementById('motionBadge');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const poseContent = document.getElementById('poseContent');
+        
+        // 倒计时元素
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const timeOptions = document.querySelectorAll('.time-option');
+        const breathingGuide = document.getElementById('breathingGuide');
+        const breathingText = document.getElementById('breathingText');
+
+        // 格式化时间显示
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 更新倒计时显示
+        function updateCountdownDisplay() {
+            countdownDisplay.textContent = formatTime(remainingTime);
+        }
+
+        // 呼吸引导
+        function startBreathingGuide() {
+            let breathCycle = 0;
+            breathingGuide.style.display = 'block';
+            
+            breathingInterval = setInterval(() => {
+                if (breathCycle % 8 < 4) {
+                    breathingText.textContent = '吸气...';
+                } else {
+                    breathingText.textContent = '呼气...';
+                }
+                breathCycle++;
+            }, 1000);
+        }
+
+        function stopBreathingGuide() {
+            if (breathingInterval) {
+                clearInterval(breathingInterval);
+                breathingInterval = null;
+            }
+            breathingGuide.style.display = 'none';
+        }
+
+        // 开始倒计时
+        function startCountdown() {
+            if (isCountdownRunning) return;
+            
+            isCountdownRunning = true;
+            startBtn.textContent = '进行中...';
+            startBreathingGuide();
+            
+            countdownInterval = setInterval(() => {
+                remainingTime--;
+                updateCountdownDisplay();
+                
+                if (remainingTime <= 0) {
+                    stopCountdown();
+                    alert('🎉 太棒了！你完成了这组练习！');
+                    resetCountdown();
+                }
+            }, 1000);
+        }
+
+        // 暂停倒计时
+        function pauseCountdown() {
+            if (!isCountdownRunning) return;
+            
+            isCountdownRunning = false;
+            clearInterval(countdownInterval);
+            startBtn.textContent = '继续';
+            stopBreathingGuide();
+        }
+
+        // 停止倒计时
+        function stopCountdown() {
+            isCountdownRunning = false;
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            stopBreathingGuide();
+        }
+
+        // 重置倒计时
+        function resetCountdown() {
+            stopCountdown();
+            remainingTime = countdownTime;
+            updateCountdownDisplay();
+            startBtn.textContent = '开始';
+        }
+
+        // 时间选择
+        timeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                timeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                countdownTime = parseInt(option.dataset.time);
+                resetCountdown();
+            });
+        });
+
+        // 倒计时按钮事件
+        startBtn.addEventListener('click', () => {
+            if (isCountdownRunning) {
+                pauseCountdown();
+            } else {
+                startCountdown();
+            }
+        });
+
+        pauseBtn.addEventListener('click', pauseCountdown);
+        resetBtn.addEventListener('click', resetCountdown);
+
+        // 启动摄像头
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 320, height: 240 } 
+                });
+                
+                video.srcObject = stream;
+                video.style.display = 'block';
+                placeholder.style.display = 'none';
+                cameraActive = true;
+                cameraBtn.textContent = '关闭摄像头';
+                cameraBtn.classList.remove('btn-green');
+                cameraBtn.classList.add('btn-red');
+                
+                detectMotion();
+            } catch (err) {
+                console.error('无法访问摄像头:', err);
+                alert('无法访问摄像头，请确保已授予权限');
+            }
+        }
+
+        // 停止摄像头
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+                placeholder.style.display = 'flex';
+                cameraActive = false;
+                cameraBtn.textContent = '启动摄像头';
+                cameraBtn.classList.remove('btn-red');
+                cameraBtn.classList.add('btn-green');
+            }
+        }
+
+        // 动作检测
+        function detectMotion() {
+            if (!cameraActive) return;
+            
+            canvas.width = 320;
+            canvas.height = 240;
+            
+            function checkMotion() {
+                if (!cameraActive) return;
+                
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const currentFrame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                
+                if (previousFrame) {
+                    let diff = 0;
+                    const threshold = 30;
+                    const pixelDiffThreshold = 5000;
+                    
+                    for (let i = 0; i < currentFrame.data.length; i += 4) {
+                        const rDiff = Math.abs(currentFrame.data[i] - previousFrame.data[i]);
+                        const gDiff = Math.abs(currentFrame.data[i + 1] - previousFrame.data[i + 1]);
+                        const bDiff = Math.abs(currentFrame.data[i + 2] - previousFrame.data[i + 2]);
+                        
+                        if (rDiff + gDiff + bDiff > threshold) {
+                            diff++;
+                        }
+                    }
+                    
+                    if (diff > pixelDiffThreshold) {
+                        motionBadge.classList.add('active');
+                        generateRandomPose();
+                        setTimeout(() => motionBadge.classList.remove('active'), 1000);
+                    }
+                }
+                
+                previousFrame = currentFrame;
+                requestAnimationFrame(checkMotion);
+            }
+            
+            checkMotion();
+        }
+
+        // 生成随机瑜伽姿势
+        function generateRandomPose() {
+            const randomIndex = Math.floor(Math.random() * beginnerYogaPoses.length);
+            currentPose = beginnerYogaPoses[randomIndex];
+            displayPose();
+            resetCountdown(); // 生成新姿势时重置倒计时
+        }
+
+        // 显示瑜伽姿势
+        function displayPose() {
+            if (!currentPose) return;
+            
+            poseContent.innerHTML = `
+                <div class="pose-content">
+                    <div class="pose-illustration">
+                        <div class="pose-icon">${currentPose.icon}</div>
+                        <div class="pose-name">${currentPose.name}</div>
+                        <span class="difficulty-badge">难度：${currentPose.difficulty}</span>
+                    </div>
+                    
+                    <div class="pose-section">
+                        <h4>📝 姿势描述</h4>
+                        <p class="description-text">${currentPose.description}</p>
+                    </div>
+                    
+                    <div class="pose-section">
+                        <h4>💪 健康益处</h4>
+                        <p class="benefits-text">${currentPose.benefits}</p>
+                    </div>
+
+                    <div class="pose-section">
+                        <h4>🫁 呼吸要领</h4>
+                        <p class="benefits-text">${currentPose.breathing}</p>
+                    </div>
+
+                    <div class="tip-box">
+                        <p><span style="font-weight: bold;">💡 初学者提示：</span> 练习时保持呼吸均匀，不要勉强自己。如感到不适请立即停止。建议使用倒计时功能保持姿势30-60秒。</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 事件监听
+        cameraBtn.addEventListener('click', () => {
+            if (cameraActive) {
+                stopCamera();
+            } else {
+                startCamera();
+            }
+        });
+
+        generateBtn.addEventListener('click', generateRandomPose);
+
+        // 初始化
+        updateCountdownDisplay();
+    </script>
+</body>
+</html>
