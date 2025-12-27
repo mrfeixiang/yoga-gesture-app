@@ -43,7 +43,7 @@
 
 1. **克隆仓库**
 ```bash
-git clone https://github.com/你的用户名/yoga-gesture-app.git
+git clone https://github.com/mrfeixiang/yoga-gesture-app.git
 cd yoga-gesture-app
 ```
 
